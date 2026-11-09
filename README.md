@@ -8,6 +8,9 @@
 
 ## 📋 更新日志 (Changelog)
 
+### v0.6.2 (2026-11-09)
+- ✨ **主动回复也走路由**: 群聊主动回复或其他插件发起的 LLM 请求（没有 @ 或唤醒词）也按难度选模型，新增 `router_config.route_active_replies` 开关（默认开启，需要 AstrBot v4.11.0+）
+
 ### v0.6.1 (2026-07-19)
 - ✨ **UMO 黑/白名单**: 按 `event.unified_msg_origin` 精确匹配，支持 WebUI 下拉配置
 - ✨ **运行时模式切换**: 新增 `/router mode [blacklist|whitelist]`

@@ -15,8 +15,8 @@ from .umo_filter import get_active_umo_list, get_filter_mode, is_umo_allowed
     "astrbot_plugin_model_router",
     "Antigravity",
     "基于意图识别的多模型路由插件",
-    "0.6.1",
-    "https://github.com/yukikazechan/astrbot_plugin_model_router"
+    "0.6.2",
+    "https://github.com/AlanBacker/astrbot_plugin_model_router"
 )
 class ModelRouterPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
