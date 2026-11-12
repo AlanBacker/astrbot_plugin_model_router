@@ -19,3 +19,6 @@ env/
 
 # AstrBot specific
 *.log
+
+# Created by AstrBot when the tests import it
+data/
