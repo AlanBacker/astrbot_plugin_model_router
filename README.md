@@ -8,6 +8,9 @@
 
 ## 📋 更新日志 (Changelog)
 
+### v0.6.3 (2026-11-11)
+- ✨ **关闭过滤模式**: `filter_type` 新增 `off`，所有会话都走路由，黑/白名单保留但不生效，方便临时放开再切回
+
 ### v0.6.2 (2026-11-09)
 - ✨ **主动回复也走路由**: 群聊主动回复或其他插件发起的 LLM 请求（没有 @ 或唤醒词）也按难度选模型，新增 `router_config.route_active_replies` 开关（默认开启，需要 AstrBot v4.11.0+）
 
@@ -82,11 +85,11 @@ UMO 是 `event.unified_msg_origin` 提供的会话唯一标识字符串。本插
 
 | 配置项 | 说明 |
 | :--- | :--- |
-| `filter_type` | `blacklist` (黑名单模式) 或 `whitelist` (白名单模式)。 |
+| `filter_type` | `blacklist` (黑名单模式)、`whitelist` (白名单模式) 或 `off` (关闭过滤，所有会话都走路由)。 |
 | `blacklist` | UMO 黑名单；命中时**跳过**路由，直接使用 AstrBot 当前默认模型。 |
 | `whitelist` | UMO 白名单；**只有**命中的会话会启用路由功能。 |
 
-默认为空黑名单，因此升级后所有会话仍保持现有路由行为。切换到空白名单后，所有会话都会跳过路由，需先添加允许的 UMO。
+默认为空黑名单，因此升级后所有会话仍保持现有路由行为。切换到空白名单后，所有会话都会跳过路由，需先添加允许的 UMO。想让所有会话都走路由又不想清空名单时，切到 `off`，两份名单原样保留，之后切回即可恢复。
 
 ## 💻 指令 (Commands)
 
@@ -97,7 +100,7 @@ UMO 是 `event.unified_msg_origin` 提供的会话唯一标识字符串。本插
 | `/router config` | 以表格形式显示当前的路由规则配置。 | `/router config` |
 | `/router status` | 查看插件启用状态、当前路由模型等信息。 | `/router status` |
 | `/router debug [on/off]` | 开启或关闭调试模式。不带参数则切换状态。 | `/router debug on` |
-| `/router mode [blacklist\|whitelist]` | 切换 UMO 过滤模式并持久化。 | `/router mode whitelist` |
+| `/router mode [blacklist\|whitelist\|off]` | 切换 UMO 过滤模式并持久化。`off` 时所有会话都走路由。 | `/router mode whitelist` |
 | `/router list` | 显示当前模式使用的 UMO 名单。 | `/router list` |
 | `/router add [umo]` | 将当前会话（或指定 UMO）添加到当前名单并持久化。 | `/router add` |
 | `/router remove [umo]` | 将当前会话（或指定 UMO）从当前名单移除并持久化。 | `/router remove` |

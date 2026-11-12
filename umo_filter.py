@@ -6,7 +6,9 @@ from typing import Any
 
 BLACKLIST_MODE = "blacklist"
 WHITELIST_MODE = "whitelist"
-FILTER_MODES = (BLACKLIST_MODE, WHITELIST_MODE)
+# Filtering disabled: every UMO is routed, stored lists are kept untouched.
+OFF_MODE = "off"
+FILTER_MODES = (BLACKLIST_MODE, WHITELIST_MODE, OFF_MODE)
 
 
 def get_filter_mode(session_config: Mapping[str, Any] | None) -> str:
@@ -40,12 +42,17 @@ def get_active_umo_list(session_config: Mapping[str, Any] | None) -> list[str]:
     if not isinstance(session_config, Mapping):
         return []
 
-    return normalize_umo_list(session_config.get(get_filter_mode(session_config), []))
+    mode = get_filter_mode(session_config)
+    if mode == OFF_MODE:
+        return []
+    return normalize_umo_list(session_config.get(mode, []))
 
 
 def is_umo_allowed(umo: str, session_config: Mapping[str, Any] | None) -> bool:
     """Return whether model routing should run for an exact UMO value."""
     normalized_umo = str(umo).strip()
     mode = get_filter_mode(session_config)
+    if mode == OFF_MODE:
+        return True
     matched = normalized_umo in get_active_umo_list(session_config)
     return matched if mode == WHITELIST_MODE else not matched

@@ -2,6 +2,7 @@ import unittest
 
 from umo_filter import (
     BLACKLIST_MODE,
+    OFF_MODE,
     get_active_umo_list,
     get_filter_mode,
     is_umo_allowed,
@@ -32,6 +33,18 @@ class UmoFilterTests(unittest.TestCase):
         config = {"filter_type": "unexpected", "blacklist": ["blocked"]}
         self.assertEqual(get_filter_mode(config), BLACKLIST_MODE)
         self.assertFalse(is_umo_allowed("blocked", config))
+
+    def test_off_mode_routes_every_umo_and_keeps_lists(self):
+        config = {
+            "filter_type": "off",
+            "blacklist": ["aiocqhttp:group:123"],
+            "whitelist": ["telegram:private:42"],
+        }
+        self.assertEqual(get_filter_mode(config), OFF_MODE)
+        self.assertTrue(is_umo_allowed("aiocqhttp:group:123", config))
+        self.assertTrue(is_umo_allowed("telegram:private:43", config))
+        self.assertEqual(get_active_umo_list(config), [])
+        self.assertEqual(config["blacklist"], ["aiocqhttp:group:123"])
 
     def test_entries_are_trimmed_and_deduplicated(self):
         config = {

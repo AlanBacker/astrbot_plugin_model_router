@@ -9,13 +9,19 @@ from astrbot.api.event.filter import after_message_sent
 from astrbot.core.provider.entities import ProviderRequest
 
 from .routing import IntentRouter
-from .umo_filter import get_active_umo_list, get_filter_mode, is_umo_allowed
+from .umo_filter import (
+    FILTER_MODES,
+    OFF_MODE,
+    get_active_umo_list,
+    get_filter_mode,
+    is_umo_allowed,
+)
 
 @register(
     "astrbot_plugin_model_router",
     "Antigravity",
     "基于意图识别的多模型路由插件",
-    "0.6.2",
+    "0.6.3",
     "https://github.com/AlanBacker/astrbot_plugin_model_router"
 )
 class ModelRouterPlugin(Star):
@@ -401,7 +407,7 @@ class ModelRouterPlugin(Star):
                 "/router config - 显示当前路由配置\n"
                 "/router debug - 切换调试模式\n"
                 "/router status - 查看路由器状态\n"
-                "/router mode [blacklist|whitelist] - 切换 UMO 过滤模式\n"
+                "/router mode [blacklist|whitelist|off] - 切换 UMO 过滤模式（off: 全部走路由）\n"
                 "/router list - 显示当前 UMO 名单\n"
                 "/router add [umo] - 添加 UMO 到当前名单\n"
                 "/router remove [umo] - 从当前名单移除 UMO"
@@ -452,13 +458,13 @@ class ModelRouterPlugin(Star):
                 f"- Enabled: {'Yes' if enabled else 'No'}\n"
                 f"- Debug: {'On' if debug else 'Off'}\n"
                 f"- Router LLM: {router_provider}:{router_model}\n"
-                f"- Version: 0.6.1"
+                f"- Version: 0.6.3"
             )
         
         elif sub_cmd == "mode":
-            if len(args) < 3 or args[2].lower() not in ("blacklist", "whitelist"):
+            if len(args) < 3 or args[2].lower() not in FILTER_MODES:
                 return event.plain_result(
-                    "Usage: /router mode [blacklist|whitelist]"
+                    "Usage: /router mode [blacklist|whitelist|off]"
                 )
 
             filter_type = args[2].lower()
@@ -473,6 +479,15 @@ class ModelRouterPlugin(Star):
             active_umos = get_active_umo_list(session_cfg)
 
             lines = [f"📋 UMO Filter Mode: {filter_type.upper()}"]
+            if filter_type == OFF_MODE:
+                lines.append(
+                    "\nAll sessions use routing. Stored lists are kept: "
+                    f"blacklist {len(session_cfg.get('blacklist') or [])}, "
+                    f"whitelist {len(session_cfg.get('whitelist') or [])} entries."
+                )
+                result = event.plain_result("\n".join(lines))
+                result.use_t2i(False)
+                return result
             icon = "✅" if filter_type == "whitelist" else "🚫"
             lines.append(
                 f"\n{icon} {filter_type.title()} ({len(active_umos)} entries):"
@@ -498,6 +513,10 @@ class ModelRouterPlugin(Star):
             
             session_cfg = self._get_session_config()
             list_key = get_filter_mode(session_cfg)
+            if list_key == OFF_MODE:
+                return event.plain_result(
+                    "⚠️ Filter is off. Switch to blacklist or whitelist first."
+                )
             active_umos = get_active_umo_list(session_cfg)
 
             if umo and umo not in active_umos:
@@ -516,6 +535,10 @@ class ModelRouterPlugin(Star):
             
             session_cfg = self._get_session_config()
             list_key = get_filter_mode(session_cfg)
+            if list_key == OFF_MODE:
+                return event.plain_result(
+                    "⚠️ Filter is off. Switch to blacklist or whitelist first."
+                )
             active_umos = get_active_umo_list(session_cfg)
 
             if umo in active_umos:
